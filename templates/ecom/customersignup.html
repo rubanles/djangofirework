@@ -1,180 +1,139 @@
-<!DOCTYPE html>
+{% load static %}
 {% load widget_tweaks %}
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>Simple E-commerce</title>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sri Ganesh Pyro Tech</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ {% comment %} owl carasouel {% endcomment %}
+ <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.css'>
+ <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.theme.min.css'>
+ <link rel='stylesheet' href='static/css/main.css'>
+ <link rel='stylesheet' href='static/css/responsive.css'>
+</head>
 
+{% block Content %} 
+<body>
+  {% include 'ecom/header.html' %} 
+  <br>
+  <div class="card logincard">
+    <form class="box" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+          <h5>Welcome You</h5>
+          
+            {% render_field userForm.first_name class="form-control" placeholder="First Name" %}<br>
+              {% render_field userForm.last_name class="form-control" placeholder="Last Name" %}<br>
+                {% render_field userForm.username class="form-control" placeholder="Username" %}<br>
+                  {% render_field userForm.password class="form-control" placeholder="Password" %}<br>
+                    {% render_field customerForm.address class="form-control" placeholder="Address" %}<br>
+                      {% render_field customerForm.mobile class="form-control" placeholder="Contact" %}<br>
+                        {% render_field customerForm.profile_pic class="form-control" placeholder="Profile pic" %}<br>
+        
+           <input type="submit" name="" value="Create" class='btn btnsearchcolor'>
 
-
-
-    <style media="screen">
-      body {
-    margin: 0;
-    padding: 0;
-    font-family: sans-serif;
-    /* background: linear-gradient(to right, #b92b27, #1565c0) */
-}
-
-.box {
-    width: 100%;
-    padding: 40px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    background: #3E454C;
-    text-align: center;
-    transition: 0.25s;
-    margin-top: 100px;
-    border-radius: 50px;
-}
-
-.box input[type="text"],
-.box input[type="password"] {
-    border: 0;
-    background: none;
-    display: block;
-    margin: 20px auto;
-    text-align: center;
-    border: 2px solid #ffffff;
-    padding: 10px 10px;
-    width: 250px;
-    outline: none;
-    color: white;
-    border-radius: 24px;
-    transition: 0.25s
-}
-
-.box h1 {
-    color: white;
-    /* text-transform: uppercase; */
-    font-weight: 500
-}
-
-.box input[type="text"]:focus,
-.box input[type="password"]:focus {
-    width: 300px;
-    border-color: #d3d3d3
-}
-
-.box input[type="submit"] {
-    border: 0;
-    background: none;
-    display: block;
-    margin: 20px auto;
-    text-align: center;
-    border: 2px solid #2ecc71;
-    padding: 14px 40px;
-    outline: none;
-    color: white;
-    border-radius: 24px;
-    transition: 0.25s;
-    cursor: pointer
-}
-
-.box input[type="submit"]:hover {
-    background: #2ecc71
-}
-
-.forgot {
-    text-decoration: underline
-}
-
-ul.social-network {
-    list-style: none;
-    display: inline;
-    margin-left: 0 !important;
-    padding: 0
-}
-
-ul.social-network li {
-    display: inline;
-    margin: 0 5px
-}
-
-.social-network a.icoFacebook:hover {
-    background-color: #3B5998
-}
-
-.social-network a.icoTwitter:hover {
-    background-color: #33ccff
-}
-
-.social-network a.icoGoogle:hover {
-    background-color: #BD3518
-}
-
-.social-network a.icoFacebook:hover i,
-.social-network a.icoTwitter:hover i,
-.social-network a.icoGoogle:hover i {
-    color: #fff
-}
-
-a.socialIcon:hover,
-.socialHoverClass {
-    color: #44BCDD
-}
-
-.social-circle li a {
-    display: inline-block;
-    position: relative;
-    margin: 0 auto 0 auto;
-    border-radius: 50%;
-    text-align: center;
-    width: 50px;
-    height: 50px;
-    font-size: 20px
-}
-
-.social-circle li i {
-    margin: 0;
-    line-height: 50px;
-    text-align: center
-}
-
-.social-circle li a:hover i,
-.triggeredHover {
-    transform: rotate(360deg);
-    transition: all 0.2s
-}
-
-.social-circle i {
-    color: #fff;
-    transition: all 0.8s;
-    transition: all 0.8s
-}
-    </style>
-  </head>
-  <body>
-    {% include "ecom/navbar.html" %}
-    <div class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <form class="box" method="post" enctype="multipart/form-data">
-                  {% csrf_token %}
-                    <h1>Customer Sign Up</h1>
-                    
-                      {% render_field userForm.first_name class="form-control" placeholder="First Name" %}
-                        {% render_field userForm.last_name class="form-control" placeholder="Last Name" %}
-                          {% render_field userForm.username class="form-control" placeholder="Username" %}
-                            {% render_field userForm.password class="form-control" placeholder="Password" %}
-                              {% render_field customerForm.address class="form-control" placeholder="Address" %}
-                                {% render_field customerForm.mobile class="form-control" placeholder="Contact" %}
-                                  {% render_field customerForm.profile_pic class="form-control" placeholder="Profile pic" %}
-                  
-                     <input type="submit" name="" value="Create">
-
-                </form>
-            </div>
-        </div>
-    </div>
+      </form>
+    <br>
+    <div>Already have an account?<a href="/customerlogin"> click here</a></div>
 </div>
-<br><br><br><br><br><br><br><br><br>
-<br><br><br><br><br><br><br><br><br>
-<br><br><br><br><br><br><br><br><br>
-<br><br><br><br><br><br><br><br><br>
-<br><br><br><br><br>
-{% include "ecom/footer.html" %}
-  </body>
+<br/><br></br>   
+  <section class="row">
+    <div class="col-md-12">
+      <footer class="site-footer">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-12 col-md-6">
+              <h6>Map</h6>
+              <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3923.957255027222!2d77.85516109999999!3d10.424966800000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTDCsDI1JzI5LjkiTiA3N8KwNTEnMTguNiJF!5e0!3m2!1sen!2sin!4v1707713836838!5m2!1sen!2sin" width="500" height="200" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+            <div class="col-xs-6 col-md-3">
+              <h6>ADDRESS</h6>
+              <p>Paraipatti</p>
+              <p>Dindugul(Dt)</p>
+              <p>Tamil Nadu</p>
+              <p>PIN: 624705</p>
+              <p>shriganeshpyrotech.in@gmail.com</p>
+              <p>contact: <span>94422-13234</span>
+              </p>
+            </div>
+            <div class="col-xs-6 col-md-3">
+              <h6>Quick Links</h6>
+              <ul class="footer-links">
+                <li>
+                  <a href="/aboutus">About Us</a>
+                </li>
+                <li>
+                  <a href="http://scanfcode.com/contact/">Contact Us</a>
+                </li>
+                <li>
+                  <a href="http://scanfcode.com/contribute-at-scanfcode/">Contribute</a>
+                </li>
+                <li>
+                  <a href="http://scanfcode.com/privacy-policy/">Privacy Policy</a>
+                </li>
+                <li>
+                  <a href="http://scanfcode.com/sitemap/">Sitemap</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <hr>
+        </div>
+        <div class="container">
+          <div class="row">
+            <div class="col-md-8 col-sm-6 col-xs-12">
+              <p class="copyright-text">Copyright &copy; 2024 All Rights Reserved by <a href="#" class="highlighttag">Sri Ganesh Pyro Tech</a>
+              </p>
+            </div>
+            <div class="col-md-4 col-sm-6 col-xs-12">
+              <ul class="social-icons">
+                <li>
+                  <a class="facebook" href="#">
+                    <i class="fa-brands fa-facebook"></i>
+                  </a>
+                </li>
+                <li>
+                  <a class="twitter" href="#">
+                    <i class="fa-brands fa-twitter"></i>
+                  </a>
+                </li>
+                <li>
+                  <a class="instagram" href="#">
+                    <i class="fa-brands fa-instagram"></i>
+                  </a>
+                </li>
+                <li>
+                  <a class="linkedin" href="#">
+                    <i class="fa-brands fa-linkedin"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </section>
+</body> 
+{% endblock %} 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script> 
+<script src='https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.js'></script>
+<script>  
+  $(document).ready(function() {
+ 
+    $("#owl-example").owlCarousel({
+        itemsDesktop : [1499,4],
+        itemsDesktopSmall : [1199,3],
+        itemsTablet : [899,2],
+        itemsMobile : [599,1],
+        navigation : true,
+        navigationText : ['<span class="fa-stack"><i class="fa fa-circle fa-stack-1x"></i><i class="fa fa-chevron-circle-left fa-stack-1x fa-inverse"></i></span>','<span class="fa-stack"><i class="fa fa-circle fa-stack-1x"></i><i class="fa fa-chevron-circle-right fa-stack-1x fa-inverse"></i></span>'],
+    });
+    
+  });
+</script>
 </html>

@@ -1,28 +1,20 @@
-"""
-
-Developed By : sumit kumar
-facebook : fb.com/sumit.luv
-Youtube :youtube.com/lazycoders
-
-
-"""
 from django.contrib import admin
 from django.urls import path
 from ecom import views
 from django.contrib.auth.views import LoginView,LogoutView
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('nF6eKe85TMaE4x2xRT8jPQ==/', admin.site.urls),
     path('',views.home_view,name=''),
     path('afterlogin', views.afterlogin_view,name='afterlogin'),
-    path('logout', LogoutView.as_view(template_name='ecom/logout.html'),name='logout'),
-    path('aboutus', views.aboutus_view),
+    path('logout', LogoutView.as_view(template_name='ecom/index.html'),name='logout'),
+    path('aboutus', views.aboutus_view,name='aboutus'),
     path('contactus', views.contactus_view,name='contactus'),
     path('search', views.search_view,name='search'),
     path('send-feedback', views.send_feedback_view,name='send-feedback'),
     path('view-feedback', views.view_feedback_view,name='view-feedback'),
 
     path('adminclick', views.adminclick_view),
-    path('adminlogin', LoginView.as_view(template_name='ecom/adminlogin.html'),name='adminlogin'),
+    path('sriganeshadminwindow', LoginView.as_view(template_name='ecom/adminlogin.html'),name='adminlogin'),
     path('admin-dashboard', views.admin_dashboard_view,name='admin-dashboard'),
 
     path('view-customer', views.view_customer_view,name='view-customer'),
@@ -34,7 +26,14 @@ urlpatterns = [
     path('delete-product/<int:pk>', views.delete_product_view,name='delete-product'),
     path('update-product/<int:pk>', views.update_product_view,name='update-product'),
 
+    path('admin-category', views.admin_categories_view,name='admin-categories'),
+    path('admin-add-category/', views.admin_add_category, name='admin-add-category'),
+    path('admin-update-category/<int:pk>/', views.update_category_view, name='admin-update-category'),
+    path('admin-delete-category/<int:pk>/', views.delete_category_view, name='admin-delete-category'),
+
     path('admin-view-booking', views.admin_view_booking_view,name='admin-view-booking'),
+    path('view_products/<int:pk>', views.view_products,name='view_products'),
+    
     path('delete-order/<int:pk>', views.delete_order_view,name='delete-order'),
     path('update-order/<int:pk>', views.update_order_view,name='update-order'),
 
@@ -54,6 +53,11 @@ urlpatterns = [
     path('remove-from-cart/<int:pk>', views.remove_from_cart_view,name='remove-from-cart'),
     path('customer-address', views.customer_address_view,name='customer-address'),
     path('payment-success', views.payment_success_view,name='payment-success'),
+    
+    path('add_to_cart', views.cart_list,name='add_to_cart'),
+    path('update_cart', views.update_cart,name='update_cart'),
+    
+
 
 
 ]

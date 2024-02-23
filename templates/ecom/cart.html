@@ -1,70 +1,7 @@
-{% extends 'ecom/homebase.html' %}
+{% extends 'ecom/customer_base.html' %}
 {% load static %}
 {% block content %}
 
-
-<head>
-  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
-  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-<style media="screen">
-  .button {
-  display: inline-block;
-  border-radius: 4px;
-  background-color: #f4511e;
-  border: none;
-  color: #FFFFFF;
-  text-align: center;
-  font-size: 28px;
-  padding: 20px;
-  width: 200px;
-  transition: all 0.5s;
-  cursor: pointer;
-  margin: 5px;
-}
-
-.button span {
-  cursor: pointer;
-  display: inline-block;
-  position: relative;
-  transition: 0.5s;
-}
-
-.button span:after {
-  content: '\00bb';
-  position: absolute;
-  opacity: 0;
-  top: 0;
-  right: -20px;
-  transition: 0.5s;
-}
-
-.button:hover span {
-  padding-right: 25px;
-}
-
-.button:hover span:after {
-  opacity: 1;
-  right: 0;
-}
-
-.button2 {
-  background-color: white;
-  color: black;
-  border: 2px solid #008CBA;
-}
-
-.button2:hover {
-  background-color: #008CBA;
-  color: white;
-}
-
-</style>
-
-</head>
-<!--
-written By : sumit kumar
--->
 <br><br><br><br>
 
 <div class="container">
@@ -77,22 +14,34 @@ written By : sumit kumar
         <tr>
           <th>Name</th>
           <th>Image</th>
+          <th>Single Price</th>
           <th>Price</th>
           <th>Description</th>
+          <th>Quantity</th>
           <th>Action</th>
 
         </tr>
       </thead>
-      {% for p in products %}
+      {% for data in context.products_data %}
+      {% for p in data.productsss %}
   {% if p %}
 
       <tr>
         <td> {{p.name}}</td>
         <td> <img src="{% static p.product_image.url %}" alt="Profile Pic" height="50px" width="50px" /></td>
-        <td>$ {{p.price}}</td>
-        <td>{{p.description}}</td>
-
-        <td><a class="btn btn-danger btn-xs" href="{% url 'remove-from-cart' p.id  %}"><span class="glyphicon glyphicon-trash"></span></a></td>
+        <td> {{p.finalprice}}</td>
+        <td>$ <span class="change-val{{p.id}} getamt{{p.id}} gettotamt" id="{{p.finalprice}}">{{data.totalamt}}</span></td>
+        <td>
+          {{p.description}}
+        </td>
+        <td>
+          <div class="qty-container">
+		        <button class="qty-btn-minus btn-light plusminus" id="{{p.id}}" type="button"><i class="fa fa-minus plusic"></i></button>
+		    	<input type="text" name="qty" value="{{data.quantity}}" min="1" class="input-qty plus-minus-input" disabled/>
+		        <button class="qty-btn-plus btn-light plusminus" id="{{p.id}}" type="button"><i class="fa fa-plus plusic"></i></button>
+		    </div>
+        </td>
+        <td><a class="btn btn-danger btn-xs" href="{% url 'remove-from-cart' data.cart_id  %}"><i class="fa fa-trash"></i></a></td>
 
       </tr>
       {%else%}
@@ -100,18 +49,136 @@ written By : sumit kumar
       <h1>no products</h1>
       {% endif %}
       {% endfor %}
+      {% endfor %}
     </table>
   </div>
 </div>
 <br><br><br>
 <div style="text-align: center;">
-  <button class="btn btn-danger btn-lg">Total ${{total}}</button>
-  <a href="/customer-address"><button class="btn btn-success btn-lg" ><span>Purchase </span></button></a>
+  <button class="btn btn-danger btn-lg grandtt" id="{{grandtot}}">Total $ <span class="tottext">{{grandtot}}</span></button>
+
+  <a href="/customer-address"><button class="btn btn-success btn-lg clickpurchase" ><span>Purchase </span></button></a>
 </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script>
+  var buttonPlus  = jQuery(".qty-btn-plus");
+  var buttonMinus = jQuery(".qty-btn-minus");
+  
+  var incrementPlus = buttonPlus.click(function() {
+    var $n = jQuery(this)
+    .parent(".qty-container")
+    .find(".input-qty");
+    var getid = jQuery(this).attr('id');
+    var amt = jQuery('.getamt'+getid).attr('id');
+    var grantot =  jQuery('.grandtt').attr('id');
+    //alert(total); return false;
+    $n.val(Number($n.val())+1);
+    var numm = Number($n.val());
+    jQuery('.change-val'+getid).text(numm * amt +".00");
+    var test = jQuery(".gettotamt").text();
+    let str =test;
+    let arr = str.split(".");
+    arr = arr.map(num => parseInt(num, 10).toString());
+    var sum = 0;
+    for(var i=0; i < arr.length; i++){
+        sum += parseInt(arr[i]);
+    }
+    jQuery('.tottext').text(sum+".00");
+    var csrfToken = jQuery('meta[name="csrf-token"]').attr('content');
+    var postData = {
+        product_id: getid,
+        quantity: numm
+    };
+    var url = '/update_cart';
+    jQuery.ajax({
+      type: 'POST',
+      url: url,
+      data: postData,
+      headers: {
+          'X-CSRFToken': csrfToken // Include CSRF token in the headers
+      },
+      success: function (response) {
+       
+      }
+    });
+  });
+  
+  var incrementMinus = buttonMinus.click(function() {
+    var $n = jQuery(this)
+    .parent(".qty-container")
+    .find(".input-qty");
+    var amount = Number($n.val());
+    var getid = jQuery(this).attr('id');
+    var amt = jQuery('.getamt'+getid).attr('id');
+    var ddd = amount - 1;
+    if (ddd == 0)
+    {
+      $n.val(1);
+      var ttt = 1 * amt +".00";
+      jQuery('.change-val'+getid).text(1 * amt +".00");
+      var test = jQuery(".gettotamt").text();
+      let str =test;
+      let arr = str.split(".");
+      arr = arr.map(num => parseInt(num, 10).toString());
+      var sum = 0;
+      for(var i=0; i < arr.length; i++){
+          sum += parseInt(arr[i]);
+      }
+      jQuery('.tottext').text(sum+".00");
+      var csrfToken = jQuery('meta[name="csrf-token"]').attr('content');
+      var postData = {
+          product_id: getid,
+          quantity: numm
+      };
+      var url = '/update_cart';
+      jQuery.ajax({
+        type: 'POST',
+        url: url,
+        data: postData,
+        headers: {
+            'X-CSRFToken': csrfToken // Include CSRF token in the headers
+        },
+        success: function (response) {
+          
+        }
+      });
+  
+    }
+    else if (amount > 0) {
+      $n.val(amount-1);
+      var qty = amount-1;
+      jQuery('.change-val'+getid).text(qty * amt +".00");
+      var test = jQuery(".gettotamt").text();
+      let str =test;
+      let arr = str.split(".");
+      arr = arr.map(num => parseInt(num, 10).toString());
+      var sum = 0;
+      for(var i=0; i < arr.length; i++){
+          sum += parseInt(arr[i]);
+      }
+      jQuery('.tottext').text(sum+".00");
+      var csrfToken = jQuery('meta[name="csrf-token"]').attr('content');
+      var postData = {
+          product_id: getid,
+          quantity: qty
+      };
+      var url = '/update_cart';
+      jQuery.ajax({
+        type: 'POST',
+        url: url,
+        data: postData,
+        headers: {
+            'X-CSRFToken': csrfToken // Include CSRF token in the headers
+        },
+        success: function (response) {
+         
+        }
+      });
+  
+    }
+  });
+  
+</script>
 
-
-<br><br><br><br><br>
-<!--
-developed By : sumit kumar
--->
 {% endblock content %}

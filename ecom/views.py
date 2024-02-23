@@ -1,20 +1,20 @@
-from django.shortcuts import render,redirect,reverse
+from itertools import count
+import json
+from django.shortcuts import get_object_or_404, render,redirect,reverse
 from . import forms,models
-from django.http import HttpResponseRedirect,HttpResponse
+from django.http import HttpResponseRedirect,HttpResponse, JsonResponse
 from django.core.mail import send_mail
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib import messages
+from datetime import datetime
 from django.conf import settings
+from .models import Cartlist
+
 
 def home_view(request):
     products=models.Product.objects.all()
-    if 'product_ids' in request.COOKIES:
-        product_ids = request.COOKIES['product_ids']
-        counter=product_ids.split('|')
-        product_count_in_cart=len(set(counter))
-    else:
-        product_count_in_cart=0
+    product_count_in_cart= Cartlist.objects.filter(user_id=request.user.id).count()
     if request.user.is_authenticated:
         return HttpResponseRedirect('afterlogin')
     return render(request,'ecom/index.html',{'products':products,'product_count_in_cart':product_count_in_cart})
@@ -75,8 +75,14 @@ def admin_dashboard_view(request):
     ordered_products=[]
     ordered_bys=[]
     for order in orders:
-        ordered_product=models.Product.objects.all().filter(id=order.product.id)
-        ordered_by=models.Customer.objects.all().filter(id = order.customer.id)
+        customername = models.User.objects.get(id = order.customer_id)
+        order.customername = customername
+        orderlist = str(order.product).replace('[','').replace(']','').replace("'",'')
+        orderlist = orderlist.split(',')
+        orderlist = [int(x.strip()) for x in orderlist]
+        for ids in orderlist:
+            ordered_product=models.Product.objects.all().filter(id=ids)
+        ordered_by=models.Customer.objects.all().filter(id = order.customer_id)
         ordered_products.append(ordered_product)
         ordered_bys.append(ordered_by)
 
@@ -129,17 +135,52 @@ def admin_products_view(request):
     products=models.Product.objects.all()
     return render(request,'ecom/admin_products.html',{'products':products})
 
+def admin_categories_view(request):
+    categories=models.Category.objects.all()
+    return render(request,'ecom/admin_category.html',{'categories':categories})
+
+
+def admin_add_category(request):
+    categoryForm=forms.CategoryForm()
+    if request.method=='POST':
+        categoryForm=forms.CategoryForm(request.POST, request.FILES)
+        if categoryForm.is_valid():
+            categoryForm.save()
+        return redirect('admin-categories')
+    return render(request,'ecom/admin_add_category.html',{'categoryForm':categoryForm})
+
+def delete_category_view(request, pk):
+    category = models.Category.objects.get(id=pk)
+    category.delete()
+    return redirect('admin-categories')
+
+
+@login_required(login_url='adminlogin')
+def update_category_view(request, pk):
+    category = models.Category.objects.get(id=pk)
+    categoryForm = forms.CategoryForm(instance=category)
+    
+    if request.method == 'POST':
+        categoryForm = forms.CategoryForm(request.POST, instance=category)
+        if categoryForm.is_valid():
+            categoryForm.save()
+            return redirect('admin-categories')  
+    
+    return render(request, 'ecom/admin_update_category.html', {'categoryForm': categoryForm})
+
 
 # admin add product by clicking on floating button
 @login_required(login_url='adminlogin')
 def admin_add_product_view(request):
     productForm=forms.ProductForm()
+    category = models.Category.objects.all()
+    print(category)
     if request.method=='POST':
         productForm=forms.ProductForm(request.POST, request.FILES)
         if productForm.is_valid():
             productForm.save()
         return HttpResponseRedirect('admin-products')
-    return render(request,'ecom/admin_add_products.html',{'productForm':productForm})
+    return render(request,'ecom/admin_add_products.html',{'productForm':productForm,'category':category})
 
 
 @login_required(login_url='adminlogin')
@@ -152,28 +193,42 @@ def delete_product_view(request,pk):
 @login_required(login_url='adminlogin')
 def update_product_view(request,pk):
     product=models.Product.objects.get(id=pk)
+    category = models.Category.objects.all()
     productForm=forms.ProductForm(instance=product)
     if request.method=='POST':
         productForm=forms.ProductForm(request.POST,request.FILES,instance=product)
         if productForm.is_valid():
             productForm.save()
             return redirect('admin-products')
-    return render(request,'ecom/admin_update_product.html',{'productForm':productForm})
+    return render(request,'ecom/admin_update_product.html',{'productForm':productForm, 'category':category})
 
 
 @login_required(login_url='adminlogin')
 def admin_view_booking_view(request):
     orders=models.Orders.objects.all()
+    product_count_in_cart= Cartlist.objects.filter(user_id=request.user.id).count()
+    print(product_count_in_cart)
     ordered_products=[]
     ordered_bys=[]
     for order in orders:
-        ordered_product=models.Product.objects.all().filter(id=order.product.id)
-        ordered_by=models.Customer.objects.all().filter(id = order.customer.id)
+        customername = models.User.objects.get(id = order.customer_id)
+        order.customername = customername
+        orderlist = str(order.product).replace('[','').replace(']','').replace("'",'')
+        orderlist = orderlist.split(',')
+        orderlist = [int(x.strip()) for x in orderlist]
+        for ids in orderlist:
+            ordered_product=models.Product.objects.all().filter(id=ids)
+        ordered_by=models.Customer.objects.all().filter(id = order.customer_id)
         ordered_products.append(ordered_product)
         ordered_bys.append(ordered_by)
     return render(request,'ecom/admin_view_booking.html',{'data':zip(ordered_products,ordered_bys,orders)})
 
-
+def view_products(request,pk):
+    ordersdet = models.Orders.objects.get(id = pk)
+    orderlist = str(ordersdet.product).replace('[','').replace(']','').replace("'",'')
+    values = map(int, orderlist.rstrip(',').split(','))
+    ordered_product=models.Product.objects.all().filter(id__in=values)
+    return render(request,'ecom/view_products.html',{'products':ordered_product})
 @login_required(login_url='adminlogin')
 def delete_order_view(request,pk):
     order=models.Orders.objects.get(id=pk)
@@ -207,35 +262,32 @@ def view_feedback_view(request):
 def search_view(request):
     # whatever user write in search box we get in query
     query = request.GET['query']
+    products_data = []
     products=models.Product.objects.all().filter(name__icontains=query)
-    if 'product_ids' in request.COOKIES:
-        product_ids = request.COOKIES['product_ids']
-        counter=product_ids.split('|')
-        product_count_in_cart=len(set(counter))
-    else:
-        product_count_in_cart=0
-
+    products_data.append({'productsss': products})
+    context = {'products_data': products_data} 
+    product_count_in_cart= Cartlist.objects.filter(user_id=request.user.id).count()
     # word variable will be shown in html when user click on search button
     word="Searched Result :"
 
     if request.user.is_authenticated:
-        return render(request,'ecom/customer_home.html',{'products':products,'word':word,'product_count_in_cart':product_count_in_cart})
+        return render(request,'ecom/customer_home.html',{'products':products,'word':word,'product_count_in_cart':product_count_in_cart,'context':context,'query':query})
     return render(request,'ecom/index.html',{'products':products,'word':word,'product_count_in_cart':product_count_in_cart})
 
 
 # any one can add product to cart, no need of signin
 def add_to_cart_view(request,pk):
     products=models.Product.objects.all()
-
+    category=models.Category.objects.all()
+    products_data = []
+    for categories in category:
+        productsss = models.Product.objects.filter(category_id=categories.id)
+        products_data.append({'category_name': categories.category_name,'category_id':categories.id,'productsss': productsss})
+        context = {'products_data': products_data} 
+        print(context) 
     #for cart counter, fetching products ids added by customer from cookies
-    if 'product_ids' in request.COOKIES:
-        product_ids = request.COOKIES['product_ids']
-        counter=product_ids.split('|')
-        product_count_in_cart=len(set(counter))
-    else:
-        product_count_in_cart=1
-
-    response = render(request, 'ecom/index.html',{'products':products,'product_count_in_cart':product_count_in_cart})
+    product_count_in_cart= Cartlist.objects.filter(user_id=request.user.id).count()
+    response = render(request, 'ecom/customer_home.html',{'products':products,'product_count_in_cart':product_count_in_cart,'context':context})
 
     #adding product id to cookies
     if 'product_ids' in request.COOKIES:
@@ -258,61 +310,53 @@ def add_to_cart_view(request,pk):
 # for checkout of cart
 def cart_view(request):
     #for cart counter
-    if 'product_ids' in request.COOKIES:
-        product_ids = request.COOKIES['product_ids']
-        counter=product_ids.split('|')
-        product_count_in_cart=len(set(counter))
-    else:
-        product_count_in_cart=0
+    product_count_in_cart= Cartlist.objects.filter(user_id=request.user.id).count()
 
+    cartdetail = Cartlist.objects.filter(user_id=request.user.id)
+    products_data = []
+    grandtot = 0
+    for categories in cartdetail:
+        productsss = models.Product.objects.filter(id=categories.product_id)
+        grandtot+=categories.finalprice
+        products_data.append({'cart_id':categories.id,'quantity': categories.quantity,'totalamt':categories.finalprice,'productsss': productsss})
+    context = {'products_data': products_data}    
+    product_ids = []
+    for ct in cartdetail:
+        product_ids.append(ct.product_id)
     # fetching product details from db whose id is present in cookie
     products=None
     total=0
-    if 'product_ids' in request.COOKIES:
-        product_ids = request.COOKIES['product_ids']
-        if product_ids != "":
-            product_id_in_cart=product_ids.split('|')
-            products=models.Product.objects.all().filter(id__in = product_id_in_cart)
-
-            #for total price shown in cart
-            for p in products:
-                total=total+p.price
-    return render(request,'ecom/cart.html',{'products':products,'total':total,'product_count_in_cart':product_count_in_cart})
+    # product_id_in_cart=product_ids.split('|')
+    products=models.Product.objects.all().filter(id__in = product_ids)
+    for p in products:
+        total=total+p.price
+    return render(request,'ecom/cart.html',{'products':products,'total':total,'product_count_in_cart':product_count_in_cart,"context":context,'grandtot':grandtot})
 
 
 def remove_from_cart_view(request,pk):
     #for counter in cart
-    if 'product_ids' in request.COOKIES:
-        product_ids = request.COOKIES['product_ids']
-        counter=product_ids.split('|')
-        product_count_in_cart=len(set(counter))
-    else:
-        product_count_in_cart=0
-
-    # removing product id from cookie
+    product_count_in_cart= Cartlist.objects.filter(user_id=request.user.id).count()
+    remove_cart_lt = Cartlist.objects.model(id=pk)
+    remove_cart_lt.delete()
+    cartdetail = Cartlist.objects.filter(user_id=request.user.id)
+    products_data = []
+    grandtot = 0
+    for categories in cartdetail:
+        productsss = models.Product.objects.filter(id=categories.product_id)
+        grandtot+=categories.finalprice
+        products_data.append({'cart_id':categories.id,'quantity': categories.quantity,'totalamt':categories.finalprice,'productsss': productsss})
+    context = {'products_data': products_data}    
+    product_ids = []
+    for ct in cartdetail:
+        product_ids.append(ct.product_id)
+    # fetching product details from db whose id is present in cookie
+    products=None
     total=0
-    if 'product_ids' in request.COOKIES:
-        product_ids = request.COOKIES['product_ids']
-        product_id_in_cart=product_ids.split('|')
-        product_id_in_cart=list(set(product_id_in_cart))
-        product_id_in_cart.remove(str(pk))
-        products=models.Product.objects.all().filter(id__in = product_id_in_cart)
-        #for total price shown in cart after removing product
-        for p in products:
-            total=total+p.price
-
-        #  for update coookie value after removing product id in cart
-        value=""
-        for i in range(len(product_id_in_cart)):
-            if i==0:
-                value=value+product_id_in_cart[0]
-            else:
-                value=value+"|"+product_id_in_cart[i]
-        response = render(request, 'ecom/cart.html',{'products':products,'total':total,'product_count_in_cart':product_count_in_cart})
-        if value=="":
-            response.delete_cookie('product_ids')
-        response.set_cookie('product_ids',value)
-        return response
+    # product_id_in_cart=product_ids.split('|')
+    products=models.Product.objects.all().filter(id__in = product_ids)
+    for p in products:
+        total=total+p.price
+    return render(request,'ecom/cart.html',{'products':products,'total':total,'product_count_in_cart':product_count_in_cart,"context":context,'grandtot':grandtot})
 
 
 def send_feedback_view(request):
@@ -332,13 +376,14 @@ def send_feedback_view(request):
 @user_passes_test(is_customer)
 def customer_home_view(request):
     products=models.Product.objects.all()
-    if 'product_ids' in request.COOKIES:
-        product_ids = request.COOKIES['product_ids']
-        counter=product_ids.split('|')
-        product_count_in_cart=len(set(counter))
-    else:
-        product_count_in_cart=0
-    return render(request,'ecom/customer_home.html',{'products':products,'product_count_in_cart':product_count_in_cart})
+    category=models.Category.objects.all()
+    products_data = []
+    for categories in category:
+        productsss = models.Product.objects.filter(category_id=categories.id)
+        products_data.append({'category_name': categories.category_name,'category_id':categories.id,'productsss': productsss})
+    context = {'products_data': products_data}    
+    product_count_in_cart= Cartlist.objects.filter(user_id=request.user.id).count()
+    return render(request,'ecom/customer_home.html',{'products':products,'product_count_in_cart':product_count_in_cart,'category':category,'context':context,'query':""})
 
 
 
@@ -347,19 +392,12 @@ def customer_home_view(request):
 def customer_address_view(request):
     # this is for checking whether product is present in cart or not
     # if there is no product in cart we will not show address form
-    product_in_cart=False
-    if 'product_ids' in request.COOKIES:
-        product_ids = request.COOKIES['product_ids']
-        if product_ids != "":
-            product_in_cart=True
-    #for counter in cart
-    if 'product_ids' in request.COOKIES:
-        product_ids = request.COOKIES['product_ids']
-        counter=product_ids.split('|')
-        product_count_in_cart=len(set(counter))
-    else:
-        product_count_in_cart=0
-
+    product_in_cart = False
+    product_count_in_cart = Cartlist.objects.filter(user_id=request.user.id).count()
+    if product_count_in_cart != 0:
+        product_in_cart = True
+    
+    # for counter in cart
     addressForm = forms.AddressForm()
     if request.method == 'POST':
         addressForm = forms.AddressForm(request.POST)
@@ -368,24 +406,46 @@ def customer_address_view(request):
             # we are not taking it from customer account table because
             # these thing can be changes
             email = addressForm.cleaned_data['Email']
-            mobile=addressForm.cleaned_data['Mobile']
+            mobile = addressForm.cleaned_data['Mobile']
             address = addressForm.cleaned_data['Address']
-            #for showing total price on payment page.....accessing id from cookies then fetching  price of product from db
-            total=0
-            if 'product_ids' in request.COOKIES:
-                product_ids = request.COOKIES['product_ids']
-                if product_ids != "":
-                    product_id_in_cart=product_ids.split('|')
-                    products=models.Product.objects.all().filter(id__in = product_id_in_cart)
-                    for p in products:
-                        total=total+p.price
-
-            response = render(request, 'ecom/payment.html',{'total':total})
-            response.set_cookie('email',email)
-            response.set_cookie('mobile',mobile)
-            response.set_cookie('address',address)
+            
+            # for showing total price on payment page
+            total = 0
+            cartdetail = Cartlist.objects.filter(user_id=request.user.id)
+            product_ids = []
+            for ct in cartdetail:
+                product_ids.append(ct.product_id)
+            products = models.Product.objects.filter(id__in=product_ids)
+            for p in products:
+                total += p.price
+            
+            current_date = datetime.now().date()
+            
+            # Debugging print statements
+            print("User ID:", request.user.id)
+            print("Product IDs:", product_ids)
+            
+            # Create or get Orders object
+            ordercrate, created = models.Orders.objects.get_or_create(
+                email=email,
+                address=address,
+                mobile=mobile,
+                order_date=current_date,
+                status='Pending',
+                customer_id=request.user.id,
+                product=product_ids
+            )
+            print("Order crate:", ordercrate)
+            print("Created:", created)
+            cart_objects = models.Cartlist.objects.filter(user_id=request.user.id)
+            cart_objects.delete()
+            response = render(request, 'ecom/payment.html', {'total': total})
+            response.set_cookie('email', email)
+            response.set_cookie('mobile', mobile)
+            response.set_cookie('address', address)
             return response
-    return render(request,'ecom/customer_address.html',{'addressForm':addressForm,'product_in_cart':product_in_cart,'product_count_in_cart':product_count_in_cart})
+    
+    return render(request, 'ecom/customer_address.html', {'addressForm': addressForm, 'product_in_cart': product_in_cart, 'product_count_in_cart': product_count_in_cart})
 
 
 
@@ -496,19 +556,13 @@ def download_invoice_view(request,orderID,productID):
         'customerMobile':order.mobile,
         'shipmentAddress':order.address,
         'orderStatus':order.status,
-
         'productName':product.name,
         'productImage':product.product_image,
         'productPrice':product.price,
         'productDescription':product.description,
 
-
     }
     return render_to_pdf('ecom/download_invoice.html',mydict)
-
-
-
-
 
 
 @login_required(login_url='customerlogin')
@@ -556,3 +610,75 @@ def contactus_view(request):
             send_mail(str(name)+' || '+str(email),message, settings.EMAIL_HOST_USER, settings.EMAIL_RECEIVING_USER, fail_silently = False)
             return render(request, 'ecom/contactussuccess.html')
     return render(request, 'ecom/contactus.html', {'form':sub})
+
+
+def cart_list(request):
+    price = request.POST.get('price')
+    quantity = request.POST.get('quantity')
+    product_id = request.POST.get('product_id')
+    finalprice = int(quantity) * int(price)
+    status =1
+    user_id = request.user.id
+    getcart = Cartlist.objects.filter(user_id=user_id,product_id=product_id).count()
+    if(getcart == 0):
+        cart_item =Cartlist(
+            user_id=user_id,
+            product_id=product_id,
+            quantity=quantity,
+            price=price,
+            finalprice=finalprice,  # Assuming finalprice is the same as price initially
+            status=status
+        )
+    
+    # Save the new cart item to the database
+        cart_item.save()
+        cart_count = Cartlist.objects.filter(user_id=user_id).count()
+        response_data = {
+            'status': 1,
+            'message': "Cart item saved successfully!",
+            'count': cart_count
+        }
+        return JsonResponse(response_data)
+    else:
+        getcartup = Cartlist.objects.filter(user_id=user_id,product_id=product_id)
+        cart_count = Cartlist.objects.filter(user_id=user_id).count()
+        user_id = request.user.id
+        cart_update = get_object_or_404(Cartlist, user_id=user_id, product_id=product_id)
+        cart_update.quantity = request.POST.get('quantity')
+        cart_update.price = request.POST.get('price')
+        cart_update.finalprice = int(request.POST.get('quantity')) * int(request.POST.get('price'))
+        cart_update.status = 1
+        cart_update.save()
+        response_data = {
+            'status': 0,
+            'message': "This product updated cart successfully!!",
+            'count': cart_count
+        }
+        return JsonResponse(response_data)
+    
+def update_cart(request):
+    product_id = request.POST.get('product_id')
+    user_id = request.user.id
+    cart_instance = Cartlist.objects.filter(user_id=user_id, product_id=product_id).first()  # Get single instance
+    if cart_instance:
+        quantity = int(request.POST.get('quantity'))
+        price = cart_instance.price
+        final_price = quantity * price
+        status = 1
+        cart_instance.quantity = quantity
+        cart_instance.price = price
+        cart_instance.finalprice = final_price
+        cart_instance.status = status
+        cart_instance.save()
+        response_data = {
+            'status': 0,
+            'message': "This product updated cart successfully!!",
+        }
+    else:
+        response_data = {
+            'status': 1,
+            'message': "No cart entry found for the given product and user.",
+        }
+    return JsonResponse(response_data)
+    
+    

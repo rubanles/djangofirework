@@ -20,55 +20,123 @@
     .row {
       margin: 100px;
     }
+    .panel-heading{
+        background: #db2d88!important;
+        color: white!important;
+      }
+
+      .downloadcsv {
+        float: right;
+        margin: -25px;
+        margin-right: -12px;
+    }
   </style>
 </head>
-<!--
-written By : sumit kumar
-facebook : fb.com/sumit.luv
--->
+
 <div class="container">
   <div class="panel panel-danger">
-    <div class="panel-heading">
-      <h6 class="panel-title">Total Orders</h6>
-    </div>
-    <table class="table table-hover table-bordered" id="dev-table">
-      <thead>
-        <tr>
-          <th>Customer</th>
-          <th>Contact</th>
-          <th>Shipping Address</th>
-          <th>Product</th>
-          <th>Image</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <!-- p for product, c for customer-->
-      {% for product,customer,order in data %}
-      <tr>
-        {% for c in customer %}
-        <td> {{c.get_name}}</td>
-        <td>{{c.mobile}}</td>
-        <td>{{order.address}}</td>
-
-        {% endfor %}
-        {% for p in product %}
-        <td> {{p.name}}</td>
-        <td> <img src="{% static p.product_image.url %}" alt="Profile Pic" height="40px" width="40px" /></td>
-        <td>{{order.status}}</td>
-        <td><a class="btn btn-primary btn-xs" href="{% url 'update-order' order.id  %}"><span class="glyphicon glyphicon-edit"></span></a>
-        <a class="btn btn-danger btn-xs" href="{% url 'delete-order' order.id  %}"><span class="glyphicon glyphicon-trash"></span></a></td>
-
-        {% endfor %}
-
-
-
-      </tr>
-      {% endfor %}
-    </table>
+      <div class="panel-heading">
+          <h6 class="panel-title">Total Orders</h6>
+          <a class="btn btn-success downloadcsv" href="#" id="download-table">Download CSV</a>
+      </div>
+      <table class="table table-hover table-bordered" id="dev-table">
+          <!-- Your table content -->
+          <thead>
+              <tr>
+                  <th>Customer</th>
+                  <th>Contact</th>
+                  <th>Shipping Address</th>
+                  <th>Product</th>
+                  {% comment %} <th>Image</th> {% endcomment %}
+                  <th>Status</th>
+                  <th>Actions</th>
+              </tr>
+          </thead>
+          <tbody>
+              <!-- p for product, c for customer -->
+              {% for product, customer, order in data %}
+                  <tr>
+                        <td>{{ order.customername }}</td>
+                        <td>{{ order.mobile }}</td>
+                        <td>{{ order.address }}</td>
+                      {% for p in product %}
+                          <td><a href="{% url 'view_products' order.id  %}">View Products</a></td>
+                          {% comment %} <td><img src="{% static p.product_image.url %}" alt="Profile Pic" height="40px" width="40px"></td> {% endcomment %}
+                          <td>{{ order.status }}</td>
+                          <td>
+                              <a class="btn btn-primary btn-xs" href="{% url 'update-order' order.id %}">
+                                  <span class="glyphicon glyphicon-edit"></span>
+                              </a>
+                              <a class="btn btn-danger btn-xs" href="{% url 'delete-order' order.id %}">
+                                  <span class="glyphicon glyphicon-trash"></span>
+                              </a>
+                          </td>
+                      {% endfor %}
+                  </tr>
+              {% endfor %}
+          </tbody>
+      </table>
   </div>
 </div>
-<!--
-developed By : sumit kumar
--->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    document.getElementById('download-table').addEventListener('click', function () {
+        var data = [];
+
+        // Add table headers to the data array
+        var headers = [];
+        $('#dev-table thead tr th').each(function () {
+            // Exclude the Image and Actions headers
+            if ($(this).text() !== "Image" && $(this).text() !== "Actions") {
+                headers.push($(this).text());
+            }
+        });
+        data.push(headers);
+
+        // Iterate over table rows
+        $('#dev-table tbody tr').each(function () {
+            var row = [];
+
+            // Iterate over table cells in the row
+            $(this).find('td').each(function (index) {
+                // Exclude the Image and Actions columns (index 4 and 6) from the data
+                if (index !== 4 && index !== 6) {
+                    row.push($(this).text());
+                }
+            });
+
+            data.push(row);
+        });
+
+        // Create CSV content
+        var csvContent = '';
+
+        // Convert data array to CSV format
+        data.forEach(function (row, index) {
+            var csvRow = row.join(',');
+            if (index < data.length - 1) {
+                csvRow += '\n';
+            }
+            csvContent += csvRow;
+        });
+
+        // Create a Blob containing the CSV content
+        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+
+        // Create a download link
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'table_data.csv';
+
+        // Append the link to the document and trigger the click event
+        document.body.appendChild(link);
+        link.click();
+
+        // Remove the link from the document
+        document.body.removeChild(link);
+    });
+</script>
+
+
+
 {% endblock content %}

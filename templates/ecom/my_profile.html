@@ -47,32 +47,44 @@
   right: 0;
   }
 
+  .image--cover {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin: 20px;
+    object-fit: cover;
+    object-position: center right;
+ }
 
+ .textcover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+ }
+ .btncolor{
+  background: #0594de;
+  color:white;
+}
 </style>
-<br><br><br>
-<div style="padding-left:300px;" class="container">
-
-        <div class="col-sm-2 col-md-2">
-            <img src="{% static customer.profile_pic.url %}"   alt="profile pic" class="img-rounded img-responsive" />
-        </div>
-        <div class="col-sm-4 col-md-4">
-            <blockquote>
-                <p>Username: {{request.user}}</p> <small><cite title="Source Title">Address: {{customer.address}}  <i class="glyphicon glyphicon-map-marker"></i></cite></small>
-            </blockquote>
-            <p><i class="glyphicon glyphicon-phone"></i>Contact: {{customer.mobile}}
-            </p>
-        </div>
-
+<br>
+<div style="padding-left:120px; background: white;" class="container">
+<div class="row">
+  <div class="col-md-6 d-flex justify-content-end">
+    <img src="{% static customer.profile_pic.url %}"   alt="profile pic" class="image--cover"/> 
+  </div>
+<div class="col-md-6 textcover">
+    <blockquote>
+        <p>Username: {{request.user}}</p><small><cite title="Source Title">Address: {{customer.address}}  <i class="glyphicon glyphicon-map-marker"></i></cite></small>
+    </blockquote>
+    <p><i class="glyphicon glyphicon-phone"></i>Contact: {{customer.mobile}}
+    </p>
+</div>
+</div>
 </div>
 <br>
 <div style="text-align: center;">
-  <a href="/edit-profile"><button class="btn btn-primary btn-lg" ><span>Edit Profile </span></button></a>
+  <a href="/edit-profile"><button class="btn btncolor btn-lg"><span>Edit Profile </span></button></a>
 </div>
-<br><br><br><br><br><br>
-<!--
-developed By : sumit kumar
--->
-
-
+<br>
 
 {% endblock content %}
