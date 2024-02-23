@@ -1,0 +1,152 @@
+{% extends 'ecom/admin_base.html' %}
+{% load static %}
+{% block content %}
+
+
+<head>
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+
+  <style media="screen">
+    a:link {
+      text-decoration: none;
+    }
+
+    h6 {
+      text-align: center;
+    }
+
+    .row {
+      margin: 100px;
+    }
+
+    .float{
+	position:fixed;
+	width:70px;
+	height:70px;
+	bottom:60px;
+	right:60px;
+	background-color:#3eb54d;
+	color:#FFF;
+	border-radius:50px;
+	text-align:center;
+	box-shadow: 5px 5px 5px #505050;
+}
+
+.my-float{
+	margin-top:22px;
+}
+.panel-heading{
+  background: #db2d88!important;
+  color: white!important;
+}
+.downloadcsv{
+  float: right;
+  margin: -25px;
+  margin-right: -12px;
+}
+  </style>
+</head>
+
+
+<div class="container">
+  <div class="panel panel-danger">
+    <div class="panel-heading">
+      <h6 class="panel-title">Total Products</h6>
+      <a class="btn btn-success downloadcsv" href="#" id="download-table">Download CSV</a>
+    </div>
+    <table class="table table-hover table-bordered" id="dev-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Image</th>
+          <th>Actual Price</th>
+          <th>Final Price</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      {% for p in products %}
+  {% if p %}
+
+      <tr>
+        <td> {{p.name}}</td>
+        <td> <img src="{% static p.product_image.url %}" alt="Profile Pic" height="40px" width="40px" /></td>
+        <td>{{p.price}}</td>
+        <td>{{p.finalprice}}</td>
+        <td>{{p.description}}</td>
+        <td><a class="btn btn-primary btn-xs" href="{% url 'update-product' p.id  %}"><span class="glyphicon glyphicon-edit"></span></a>
+          <a class="btn btn-danger btn-xs" href="{% url 'delete-product' p.id  %}"><span class="glyphicon glyphicon-trash"></span></a></td>
+
+      </tr>
+      {%else%}
+      <br><br><br>
+      <h1>No Products!!</h1>
+      {% endif %}
+      {% endfor %}
+    </table>
+  </div>
+</div>
+<!-- add product floating button -->
+<a href="/admin-add-product" class="float">
+<i class="fa fa-plus my-float"></i>
+</a>
+<script>
+  document.getElementById('download-table').addEventListener('click', function () {
+      var data = [];
+
+      // Add table headers to the data array
+      var headers = [];
+      $('#dev-table thead tr th').each(function () {
+          // Exclude the Image and Actions headers
+          if ($(this).text() !== "Image" && $(this).text() !== "Actions") {
+              headers.push($(this).text());
+          }
+      });
+      data.push(headers);
+
+      // Iterate over table rows
+      $('#dev-table tbody tr').each(function () {
+          var row = [];
+
+          // Iterate over table cells in the row
+          $(this).find('td').each(function (index) {
+              // Exclude the Image and Actions columns (index 4 and 6) from the data
+              if (index !== 1 && index !== 5) {
+                  row.push($(this).text());
+              }
+          });
+
+          data.push(row);
+      });
+
+      // Create CSV content
+      var csvContent = '';
+
+      // Convert data array to CSV format
+      data.forEach(function (row, index) {
+          var csvRow = row.join(',');
+          if (index < data.length - 1) {
+              csvRow += '\n';
+          }
+          csvContent += csvRow;
+      });
+
+      // Create a Blob containing the CSV content
+      var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+
+      // Create a download link
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'table_data.csv';
+
+      // Append the link to the document and trigger the click event
+      document.body.appendChild(link);
+      link.click();
+
+      // Remove the link from the document
+      document.body.removeChild(link);
+  });
+</script>
+{% endblock content %}

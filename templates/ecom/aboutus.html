@@ -1,0 +1,471 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sri Ganesh Pyro Tech</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ {% comment %} owl carasouel {% endcomment %}
+ <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.css'>
+ <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.theme.min.css'>
+</head>
+<style>
+  body{
+    overflow-x:hidden;
+  }
+  /*nav button Start */
+  .firstnav{
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+  .secnav{
+    background: #db2d88;
+  }
+  .phone {
+    float: right;
+    width: 282px;
+    height: 70px;
+    margin: 25px 10px 25px 10px;
+    display: table;
+    background: url(static/images/phoneimg.png) no-repeat;
+    border-left: transparent;
+}
+  .buttons {
+    display: flex;
+    justify-content: space-around;
+    top: 20px;
+    left: 20px;
+    background:
+  }
+
+  .buttons button {
+    width: 150px;
+    height: 50px;
+    background-color: transparent;
+    margin: 20px;
+    color: #0094e5;
+    /* Change this to your desired text color */
+    position: relative;
+    overflow: hidden;
+    font-size: 14px;
+    letter-spacing: 1px;
+    font-weight: 500;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 0;
+  }
+
+  .buttons button:before {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background-color: #0094e5;
+    /* Change this to your desired border color */
+    transition: all 0.3s 0.2s ease;
+    left: 0;
+    top: 0;
+  }
+
+  .buttons button:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: #0094e5;
+    /* Change this to your desired border color */
+    transition: all 0.3s ease;
+    right: 0;
+    bottom: 0;
+  }
+
+  .buttons button p {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    color: white;
+  }
+
+  .buttons button p:before {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 0;
+    background-color: #0094e5;
+    /* Change this to your desired border color */
+    transition: all 0.3s 0.4s ease;
+    right: 0;
+    top: 0;
+  }
+
+  .buttons button p:after {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 0;
+    background-color: #0094e5;
+    /* Change this to your desired border color */
+    transition: all 0.3s ease;
+    left: 0;
+    bottom: 0;
+  }
+
+  .buttons button:hover {
+    color: #000;
+    /* Change this to your desired text color */
+    letter-spacing: 2px;
+  }
+
+  .buttons button:hover:before,
+  .buttons button:hover:after {
+    width: 100%;
+  }
+
+  .buttons button:hover p:before,
+  .buttons button:hover p:after {
+    height: 100%;
+  }
+
+  .buttons button span {
+    height: 100%;
+    top: 0;
+  }
+
+  .buttons button:active {
+    outline: none;
+    border: none;
+  }
+
+  .buttons button:focus {
+    outline: 0;
+  }
+
+  /*nav button end */
+  
+
+  /*footer css */
+  .site-footer {
+    background-color: #db2d88;
+    padding: 45px 0 20px;
+    font-size: 15px;
+    line-height: 24px;
+    color: #fff;
+  }
+
+  .site-footer hr {
+    border-top-color: #bbb;
+    opacity: 0.5
+  }
+
+  .site-footer hr.small {
+    margin: 20px 0
+  }
+
+  .site-footer h6 {
+    color: #fff;
+    font-size: 16px;
+    text-transform: uppercase;
+    margin-top: 5px;
+    letter-spacing: 2px
+  }
+
+  .site-footer a {
+    color: #0092dd;
+  }
+
+  .site-footer a:hover {
+    color: #3366cc;
+    text-decoration: none;
+  }
+
+  .footer-links {
+    padding-left: 0;
+    list-style: none
+  }
+
+  .footer-links li {
+    display: block
+  }
+
+  .footer-links a {
+    color: #fff;
+  }
+
+  .footer-links a:active,
+  .footer-links a:focus,
+  .footer-links a:hover {
+    color: #3366cc;
+    text-decoration: none;
+  }
+
+  .footer-links.inline li {
+    display: inline-block
+  }
+
+  .site-footer .social-icons {
+    text-align: right
+  }
+
+  .site-footer .social-icons a {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    margin-left: 6px;
+    margin-right: 0;
+    border-radius: 100%;
+    background-color: #33353d
+  }
+
+  .copyright-text {
+    margin: 0
+  }
+
+  @media (max-width:991px) {
+    .site-footer [class^=col-] {
+      margin-bottom: 30px
+    }
+  }
+
+  @media (max-width:767px) {
+    .site-footer {
+      padding-bottom: 0
+    }
+
+    .site-footer .copyright-text,
+    .site-footer .social-icons {
+      text-align: center
+    }
+  }
+
+  .social-icons {
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none
+  }
+
+  .social-icons li {
+    display: inline-block;
+    margin-bottom: 4px
+  }
+
+  .social-icons li.title {
+    margin-right: 15px;
+    text-transform: uppercase;
+    color: #96a2b2;
+    font-weight: 700;
+    font-size: 13px
+  }
+
+  .social-icons a {
+    background-color: #eceeef;
+    color: #818a91;
+    font-size: 16px;
+    display: inline-block;
+    line-height: 44px;
+    width: 44px;
+    height: 44px;
+    text-align: center;
+    margin-right: 8px;
+    border-radius: 100%;
+    -webkit-transition: all .2s linear;
+    -o-transition: all .2s linear;
+    transition: all .2s linear
+  }
+
+  .social-icons a:active,
+  .social-icons a:focus,
+  .social-icons a:hover {
+    color: #fff;
+    background-color: #29aafe
+  }
+
+  .social-icons.size-sm a {
+    line-height: 34px;
+    height: 34px;
+    width: 34px;
+    font-size: 14px
+  }
+
+  .social-icons a.facebook:hover {
+    background-color: #3b5998
+  }
+
+  .social-icons a.twitter:hover {
+    background-color: #00aced
+  }
+
+  .social-icons a.linkedin:hover {
+    background-color: #007bb6
+  }
+
+  .social-icons a.instagram:hover {
+    background-color: #ea4c89
+  }
+
+  @media (max-width:767px) {
+    .social-icons li.title {
+      display: block;
+      margin-right: 0;
+      font-weight: 600
+    }
+  }
+
+  .highlighttag {
+    color: #0092dd;
+    font-size: 20px;
+    font-weight: 800;
+    text-shadow: 0px 1px white;
+  }
+  .atagcls {
+    color: white!important;
+    text-decoration:none!important;
+}
+</style> 
+{% block Content %} 
+<body>
+  <div class="row secnav">
+    <div class="col-md-3 pb-0 firstnav">
+      <img src="static/images/shriganesh-removebg-preview.png" style="max-width: 90px;">
+    </div>
+    <div class=="col-md-9">
+        <nav style="border: 1px soild white;">
+            <div class="buttons" style="background: #db2d88;">
+              <button><p><a href="/" class="atagcls">home</a></p></button>
+              <button><p><a href="/aboutus" class="atagcls">about</a></p></button>
+              <button><p><a href="/contactus" class="atagcls">contacts</a></p></button>
+              <button><p><a href="/customerlogin" class="atagcls">Products</a></p></button>
+              <button><p><a href="/customerlogin" class="atagcls">LOGIN & SIGNUP</a></p></button>
+            </div>
+          </nav>
+    </div>
+  </div>
+  
+  <br>
+  <div class="container">
+    <div class="card">
+      <header class="card-header" style="text-align:center; font-size: 21px">About Us</header>
+    <p class="card-text" style="margin: 10px; padding: 10px;">With a 30-year history, Shri Ganesh Pyro Tech is a well-known producer of premium firecrackers. Our credo is that every seasonal celebration should be joyous and secure. We use our wide variety of firecrackers for this. With over 300 different types of crackers produced and sold each year, we are among the most sought-after products in the Sivakasi area and across the nation. We have been a wholesale and retail trader of firecracker supplies for the last 15 years. We take great care to guarantee that all of our orders are delivered promptly and affordably, and our products are renowned for their safety.
+      <br>
+      We are the leading supplier of Sparklers, Ground Chakkars, Flower Pots, Fountains, Fancy Crackers, Sound Crackers, Novelty Fireworks, Rockets, Bombs, Twinkling Stars, Elite Crackers, Fancy Deluxe Fountains, Loose Crackers, Electric Crackers, Super Blast Wala Crackers, Fancy Novelties, Multi Color Shots, Aerial Color Novelties, Comets and Fireworks Gift Box.
+    </p>
+    </div>
+  </br>   
+    <div class="card">
+      <header class="card-header" style="text-align:center; font-size: 21px">Vision and Mission</header>
+    
+    <p class="card-text" style="margin: 10px; padding: 10px;">To be the best wholesaler of all kinds of fancy crackers and gift boxes, as well as the dominant player in innovative and colorful crackers. Our purpose is to provide our valued customers with high-quality, innovative fireworks at a reasonable price, illuminating all of their celebrations.</p>
+
+    </div>
+  </div>
+<br/><br>
+
+  <section class="row">
+    <div class="col-md-12">
+      <footer class="site-footer">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-12 col-md-6">
+              <h6>Map</h6>
+              <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3923.957255027222!2d77.85516109999999!3d10.424966800000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTDCsDI1JzI5LjkiTiA3N8KwNTEnMTguNiJF!5e0!3m2!1sen!2sin!4v1707713836838!5m2!1sen!2sin" width="500" height="200" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+            <div class="col-xs-6 col-md-3">
+              <h6>ADDRESS</h6>
+              <p>Paraipatti</p>
+              <p>Dindugul(Dt)</p>
+              <p>Tamil Nadu</p>
+              <p>PIN: 624705</p>
+              <p>shriganeshpyrotech.in@gmail.com</p>
+              <p>contact: <span>94422-13234</span>
+              </p>
+            </div>
+            <div class="col-xs-6 col-md-3">
+              <h6>Quick Links</h6>
+              <ul class="footer-links">
+                <li>
+                  <a href="/aboutus">About Us</a>
+                </li>
+                <li>
+                  <a href="/contacts">Contact Us</a>
+                </li>
+                <li>
+                  <a href="http://scanfcode.com/contribute-at-scanfcode/">Contribute</a>
+                </li>
+                <li>
+                  <a href="http://scanfcode.com/privacy-policy/">Privacy Policy</a>
+                </li>
+                <li>
+                  <a href="http://scanfcode.com/sitemap/">Sitemap</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <hr>
+        </div>
+        <div class="container">
+          <div class="row">
+            <div class="col-md-8 col-sm-6 col-xs-12">
+              <p class="copyright-text">Copyright &copy; 2024 All Rights Reserved by <a href="#" class="highlighttag">Sri Ganesh Pyro Tech</a>
+              </p>
+            </div>
+            <div class="col-md-4 col-sm-6 col-xs-12">
+              <ul class="social-icons">
+                <li>
+                  <a class="facebook" href="#">
+                    <i class="fa-brands fa-facebook"></i>
+                  </a>
+                </li>
+                <li>
+                  <a class="twitter" href="#">
+                    <i class="fa-brands fa-twitter"></i>
+                  </a>
+                </li>
+                <li>
+                  <a class="instagram" href="#">
+                    <i class="fa-brands fa-instagram"></i>
+                  </a>
+                </li>
+                <li>
+                  <a class="linkedin" href="#">
+                    <i class="fa-brands fa-linkedin"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </section>
+</body> 
+{% endblock %} 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script> 
+<script src='https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.js'></script>
+<script>  
+  $(document).ready(function() {
+ 
+    $("#owl-example").owlCarousel({
+        itemsDesktop : [1499,4],
+        itemsDesktopSmall : [1199,3],
+        itemsTablet : [899,2],
+        itemsMobile : [599,1],
+        navigation : true,
+        navigationText : ['<span class="fa-stack"><i class="fa fa-circle fa-stack-1x"></i><i class="fa fa-chevron-circle-left fa-stack-1x fa-inverse"></i></span>','<span class="fa-stack"><i class="fa fa-circle fa-stack-1x"></i><i class="fa fa-chevron-circle-right fa-stack-1x fa-inverse"></i></span>'],
+    });
+    
+  });
+</script>
+</html>

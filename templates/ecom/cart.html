@@ -1,0 +1,184 @@
+{% extends 'ecom/customer_base.html' %}
+{% load static %}
+{% block content %}
+
+<br><br><br><br>
+
+<div class="container">
+  <div class="panel panel-success">
+    <div class="panel-heading">
+      <h6 style="text-align:center;" class="panel-title">My Cart</h6>
+    </div>
+    <table class="table table-hover table-bordered" id="dev-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Image</th>
+          <th>Single Price</th>
+          <th>Price</th>
+          <th>Description</th>
+          <th>Quantity</th>
+          <th>Action</th>
+
+        </tr>
+      </thead>
+      {% for data in context.products_data %}
+      {% for p in data.productsss %}
+  {% if p %}
+
+      <tr>
+        <td> {{p.name}}</td>
+        <td> <img src="{% static p.product_image.url %}" alt="Profile Pic" height="50px" width="50px" /></td>
+        <td> {{p.finalprice}}</td>
+        <td>$ <span class="change-val{{p.id}} getamt{{p.id}} gettotamt" id="{{p.finalprice}}">{{data.totalamt}}</span></td>
+        <td>
+          {{p.description}}
+        </td>
+        <td>
+          <div class="qty-container">
+		        <button class="qty-btn-minus btn-light plusminus" id="{{p.id}}" type="button"><i class="fa fa-minus plusic"></i></button>
+		    	<input type="text" name="qty" value="{{data.quantity}}" min="1" class="input-qty plus-minus-input" disabled/>
+		        <button class="qty-btn-plus btn-light plusminus" id="{{p.id}}" type="button"><i class="fa fa-plus plusic"></i></button>
+		    </div>
+        </td>
+        <td><a class="btn btn-danger btn-xs" href="{% url 'remove-from-cart' data.cart_id  %}"><i class="fa fa-trash"></i></a></td>
+
+      </tr>
+      {%else%}
+      <br><br><br>
+      <h1>no products</h1>
+      {% endif %}
+      {% endfor %}
+      {% endfor %}
+    </table>
+  </div>
+</div>
+<br><br><br>
+<div style="text-align: center;">
+  <button class="btn btn-danger btn-lg grandtt" id="{{grandtot}}">Total $ <span class="tottext">{{grandtot}}</span></button>
+
+  <a href="/customer-address"><button class="btn btn-success btn-lg clickpurchase" ><span>Purchase </span></button></a>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script>
+  var buttonPlus  = jQuery(".qty-btn-plus");
+  var buttonMinus = jQuery(".qty-btn-minus");
+  
+  var incrementPlus = buttonPlus.click(function() {
+    var $n = jQuery(this)
+    .parent(".qty-container")
+    .find(".input-qty");
+    var getid = jQuery(this).attr('id');
+    var amt = jQuery('.getamt'+getid).attr('id');
+    var grantot =  jQuery('.grandtt').attr('id');
+    //alert(total); return false;
+    $n.val(Number($n.val())+1);
+    var numm = Number($n.val());
+    jQuery('.change-val'+getid).text(numm * amt +".00");
+    var test = jQuery(".gettotamt").text();
+    let str =test;
+    let arr = str.split(".");
+    arr = arr.map(num => parseInt(num, 10).toString());
+    var sum = 0;
+    for(var i=0; i < arr.length; i++){
+        sum += parseInt(arr[i]);
+    }
+    jQuery('.tottext').text(sum+".00");
+    var csrfToken = jQuery('meta[name="csrf-token"]').attr('content');
+    var postData = {
+        product_id: getid,
+        quantity: numm
+    };
+    var url = '/update_cart';
+    jQuery.ajax({
+      type: 'POST',
+      url: url,
+      data: postData,
+      headers: {
+          'X-CSRFToken': csrfToken // Include CSRF token in the headers
+      },
+      success: function (response) {
+       
+      }
+    });
+  });
+  
+  var incrementMinus = buttonMinus.click(function() {
+    var $n = jQuery(this)
+    .parent(".qty-container")
+    .find(".input-qty");
+    var amount = Number($n.val());
+    var getid = jQuery(this).attr('id');
+    var amt = jQuery('.getamt'+getid).attr('id');
+    var ddd = amount - 1;
+    if (ddd == 0)
+    {
+      $n.val(1);
+      var ttt = 1 * amt +".00";
+      jQuery('.change-val'+getid).text(1 * amt +".00");
+      var test = jQuery(".gettotamt").text();
+      let str =test;
+      let arr = str.split(".");
+      arr = arr.map(num => parseInt(num, 10).toString());
+      var sum = 0;
+      for(var i=0; i < arr.length; i++){
+          sum += parseInt(arr[i]);
+      }
+      jQuery('.tottext').text(sum+".00");
+      var csrfToken = jQuery('meta[name="csrf-token"]').attr('content');
+      var postData = {
+          product_id: getid,
+          quantity: numm
+      };
+      var url = '/update_cart';
+      jQuery.ajax({
+        type: 'POST',
+        url: url,
+        data: postData,
+        headers: {
+            'X-CSRFToken': csrfToken // Include CSRF token in the headers
+        },
+        success: function (response) {
+          
+        }
+      });
+  
+    }
+    else if (amount > 0) {
+      $n.val(amount-1);
+      var qty = amount-1;
+      jQuery('.change-val'+getid).text(qty * amt +".00");
+      var test = jQuery(".gettotamt").text();
+      let str =test;
+      let arr = str.split(".");
+      arr = arr.map(num => parseInt(num, 10).toString());
+      var sum = 0;
+      for(var i=0; i < arr.length; i++){
+          sum += parseInt(arr[i]);
+      }
+      jQuery('.tottext').text(sum+".00");
+      var csrfToken = jQuery('meta[name="csrf-token"]').attr('content');
+      var postData = {
+          product_id: getid,
+          quantity: qty
+      };
+      var url = '/update_cart';
+      jQuery.ajax({
+        type: 'POST',
+        url: url,
+        data: postData,
+        headers: {
+            'X-CSRFToken': csrfToken // Include CSRF token in the headers
+        },
+        success: function (response) {
+         
+        }
+      });
+  
+    }
+  });
+  
+</script>
+
+{% endblock content %}
